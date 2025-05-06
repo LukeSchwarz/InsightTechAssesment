@@ -18,3 +18,41 @@ If you want to learn more about creating good readme files then refer the follow
 - [ASP.NET Core](https://github.com/aspnet/Home)
 - [Visual Studio Code](https://github.com/Microsoft/vscode)
 - [Chakra Core](https://github.com/Microsoft/ChakraCore)
+
+
+Notes
+
+Frontend
+
+- Install Node.js
+- Install React
+
+- npx create-react-app insight_web
+- npm install react-router-dom
+- npm start (change to yarn?)
+
+- Add Material UI
+
+Back End
+- Download docker desktop
+- Use Postman to test API call for accounts
+
+- Install Sql Server
+- Install SSMS
+
+- Create ASP .net core web API with container support
+- Add Api structure call an test with swagger
+
+Infastructure (Code as Infastructure)
+
+- Install Azure CLI
+- .Net SDK 8
+
+- Bicep install (Using bicep over terraform)
+ - az bicep install
+ - az bicep upgrade
+
+- install bicep extension for visual code
+
+- Create main.bicep
+- Test file: 'az bicep build --file main.bicep'
