@@ -9,7 +9,7 @@ namespace InsightApi
 		{
 		}
 
-		public DbSet<Account> Account { get; set; }
+		public virtual DbSet<Account> Account { get; set; }
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{

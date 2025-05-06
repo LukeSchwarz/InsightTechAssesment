@@ -1,7 +1,8 @@
-﻿using InsightApi.Api;
+﻿using AutoMapper;
 using InsightApi.Enums;
 using InsightApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace InsightApi.Controllers
 {
@@ -9,14 +10,26 @@ namespace InsightApi.Controllers
 	[Route("cds-au/v1/banking/accounts")]
 	public class AccountController : ControllerBase
 	{
-		// private readonly InsightAccountsApiDbContext _insightAccountsApiDbContext;
+		private readonly InsightApiDbContext _insightAccountsApiDbContext;
 
-		public AccountController()
+		public AccountController(InsightApiDbContext context)
 		{
+			_insightAccountsApiDbContext = context;
+		}
+
+		/// <summary>
+		/// Use auto mapper to map the Account to AccountDto.
+		/// </summary>
+		private class AccountControllerProfile : Profile
+		{
+			public AccountControllerProfile()
+			{
+				CreateMap<Account, AccountDto>();
+			}
 		}
 
 		[HttpGet]
-		public IActionResult GetAccounts(
+		public async Task<IActionResult> GetAccounts(
 			[FromQuery(Name = "product-category")] BankingProductCategory? productCategory,
 			[FromQuery(Name = "open-status")] OpenStatus? openStatus,
 			[FromQuery(Name = "is-owned")] bool? isOwned,
@@ -25,14 +38,7 @@ namespace InsightApi.Controllers
 		{
 
 			// Add a database for quering.
-			// await _insightAccountsApiDbContext.Account.ToListAsync();
-
-			// TODO: Remove test data account.
-			var allAccounts = new List<Account> {
-				new Account { AccountId = "123", DisplayName = "Main Account", ProductCategory = BankingProductCategory.TRANS_AND_SAVINGS_ACCOUNTS, OpenStatus = OpenStatus.OPEN, IsOwned = true },
-				new Account { AccountId = "124", DisplayName = "Second Account", ProductCategory = BankingProductCategory.TRADE_FINANCE, OpenStatus = OpenStatus.OPEN, IsOwned = true },
-				new Account { AccountId = "125", DisplayName = "Third Account", ProductCategory = BankingProductCategory.TRANS_AND_SAVINGS_ACCOUNTS, OpenStatus = OpenStatus.OPEN, IsOwned = true },
-			};
+			var allAccounts = await _insightAccountsApiDbContext.Account.ToListAsync();
 
 			var filtered = allAccounts.AsQueryable();
 
@@ -45,7 +51,7 @@ namespace InsightApi.Controllers
 			if (isOwned.HasValue)
 				filtered = filtered.Where(a => a.IsOwned == isOwned.Value);
 
-			return Ok(allAccounts); // new { data = filtered.Skip((page - 1) * pageSize).Take(pageSize) });
+			return Ok(filtered); // new { data = filtered.Skip((page - 1) * pageSize).Take(pageSize) });
 		}
 	}
 }
