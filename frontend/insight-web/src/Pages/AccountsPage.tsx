@@ -5,7 +5,7 @@ export default function AccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
 
   useEffect(() => {
-    fetch('http://32768:8080/cds-au/v1/banking/accounts') // Replace with your API URL
+    fetch('http://localhost:5020/cds-au/v1/banking/accounts')
       .then((res) => res.json())
       .then(setAccounts)
       .catch((err) => console.error('Failed to fetch accounts:', err));

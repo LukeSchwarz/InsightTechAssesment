@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InsightApi.Tests;
 
-public class AccountTest
+public class AccountControllerTest
 {
 	/// <summary>
 	/// Sample test using in memory database to test the AccountController.

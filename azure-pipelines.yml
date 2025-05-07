@@ -2,3 +2,96 @@
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
+
+trigger:
+  - none
+#  branches:
+#    include:
+#      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  apiProjectPath: 'api/InsightApi.csproj'
+  reactAppPath: 'frontend'
+  artifactName: 'api-artifact'
+  resourceGroup: 'bigpurple-rg'
+  bicepFile: 'infra/main.bicep'
+  appName: 'main' # Should match the Bicep output
+  sqlAdminUsername: 'sqladmin' # Can also be a pipeline variable if needed
+
+stages:
+  - stage: BuildAndTest
+    displayName: 'Build and Test'
+    jobs:
+      - job: Build
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              packageType: 'sdk'
+              version: '8.x'
+
+          - script: dotnet restore $(apiProjectPath)
+            displayName: 'Restore .NET API'
+
+          - script: dotnet build $(apiProjectPath) --configuration $(buildConfiguration)
+            displayName: 'Build .NET API'
+
+          - script: dotnet test tests/ --configuration $(buildConfiguration)
+            displayName: 'Run Unit Tests'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '18.x'
+            displayName: 'Install Node.js'
+
+          - script: |
+              cd $(reactAppPath)
+              npm install
+              npm run build
+            displayName: 'Build React App'
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: 'api/bin/$(buildConfiguration)/net8.0'
+              artifactName: '$(artifactName)'
+              publishLocation: 'Container'
+
+#  - stage: DeployInfrastructure
+#    displayName: 'Deploy Infrastructure with Bicep'
+#    dependsOn: BuildAndTest
+#    jobs:
+#      - job: DeployBicep
+#        steps:
+#          - task: AzureCLI@2
+#            inputs:
+#              azureSubscription: '<Your-Service-Connection-Name>' # TODO: Replace this
+#              scriptType: 'bash'
+#              scriptLocation: 'inlineScript'
+#              inlineScript: |
+#                echo "Deploying Azure infrastructure using Bicep..."
+#                az deployment group create \
+#                  --resource-group $(resourceGroup) \
+#                  --template-file $(bicepFile) \
+#                  --parameters adminLogin=$(sqlAdminUsername) adminPassword=$(sqlAdminPassword)
+#           env:
+#              sqlAdminPassword: $(sqlAdminPassword) # Secure secret variable set in Dev 
+#            displayName: 'Deploy Bicep Template'
+
+#  - stage: DeployAPI
+#    displayName: 'Deploy API to Azure App Service'
+#    dependsOn: DeployInfrastructure
+#    jobs:
+#      - job: DeployWebApp
+#        steps:
+#          - download: current
+#            artifact: $(artifactName)
+
+#          - task: AzureWebApp@1
+#            inputs:
+#              azureSubscription: '<Your-Service-Connection-Name>' # Replace this
+#              appName: $(appName)
+#              package: '$(Pipeline.Workspace)/$(artifactName)'
+#            displayName: 'Deploy .NET API to App Service'
